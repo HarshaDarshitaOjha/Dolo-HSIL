@@ -9,7 +9,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 def get_ai_response(messages: list) -> dict:
     """
     Send messages array to Gemini and return structured response.
-    Uses Gemini 1.5 Flash with low temperature for factual output.
+    Uses Gemini 2.5 Flash with low temperature for factual output.
     """
     try:
         # Extract system prompts and build conversation
@@ -31,7 +31,7 @@ def get_ai_response(messages: list) -> dict:
         system_instruction = "\n\n".join(system_parts) if system_parts else None
 
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=conversation,
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
@@ -94,7 +94,7 @@ def get_ai_response_with_image(messages: list, base64_image: str, mime_type: str
         )
 
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=conversation,
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
