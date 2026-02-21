@@ -1,3 +1,4 @@
+import base64
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from database import get_db
@@ -5,11 +6,11 @@ from models.conversation import Conversation
 from schemas.schemas import SendMessage
 from services.memory_service import build_context, store_message
 from services.ai_service import get_ai_response, get_ai_response_with_image
-import base64
 
 router = APIRouter(tags=["AI Analysis"])
-ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"]
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+
+# --- Text Chat Endpoint (from Day 3) ---
 
 @router.post("/chat/{conversation_id}")
 def chat(conversation_id: int, body: SendMessage, db: Session = Depends(get_db)):
@@ -28,25 +29,11 @@ def chat(conversation_id: int, body: SendMessage, db: Session = Depends(get_db))
     # Build context with all previous messages
     context = build_context(db, conversation_id)
 
-    # Send to OpenAI
+    # Send to Gemini
     result = get_ai_response(context)
 
     if not result["success"]:
-        # map specific errors to HTTP status codes
-        err_code = result.get("error")
-        detail_msg = result.get("message", result.get("error"))
-        if err_code == "quota_exceeded":
-            # inform client of the quota problem
-            raise HTTPException(
-                status_code=429,
-                detail=(
-                    "OpenAI quota exceeded or rate limit hit. "
-                    "Please check your plan/billing or try again later. "
-                    f"({detail_msg})"
-                ),
-            )
-        # generic 500 for other failures
-        raise HTTPException(status_code=500, detail=detail_msg)
+        raise HTTPException(status_code=500, detail=result["error"])
 
     # Store assistant reply
     store_message(db, conversation_id, "assistant", result["raw"])
@@ -55,6 +42,13 @@ def chat(conversation_id: int, body: SendMessage, db: Session = Depends(get_db))
         "conversation_id": conversation_id,
         "response": result["data"] if result["data"] else result["raw"],
     }
+
+
+# --- Image Analysis Endpoint (Day 4) ---
+
+ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"]
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
 
 @router.post("/analyze-report/{conversation_id}")
 async def analyze_report(
@@ -100,22 +94,11 @@ async def analyze_report(
     # 6. Build context
     context = build_context(db, conversation_id)
 
-    # 7. Send to OpenAI with image
+    # 7. Send to Gemini with image
     result = get_ai_response_with_image(context, base64_image, file.content_type)
 
     if not result["success"]:
-        err_code = result.get("error")
-        detail_msg = result.get("message", result.get("error"))
-        if err_code == "quota_exceeded":
-            raise HTTPException(
-                status_code=429,
-                detail=(
-                    "OpenAI quota exceeded or rate limit hit. "
-                    "Please check your plan/billing or try again later. "
-                    f"({detail_msg})"
-                ),
-            )
-        raise HTTPException(status_code=500, detail=detail_msg)
+        raise HTTPException(status_code=500, detail=result["error"])
 
     # 8. Store assistant reply
     store_message(db, conversation_id, "assistant", result["raw"])
