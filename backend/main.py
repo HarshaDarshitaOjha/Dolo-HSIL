@@ -1,24 +1,43 @@
-from fastapi import FastAPI, Depends
-from database import Base, engine, get_db
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from database import engine, Base
 from routers import conversation, analyze
-from sqlalchemy.orm import Session
-from services.memory_service import build_context, store_message
-from config import GEMINI_API_KEY
 
 # Create all tables
-Base.metadata.create_all(bind = engine)
+Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title = "Dolo - Medical Report AI Analyzer")
+app = FastAPI(
+    title="Dolo - Medical Report AI Analyzer",
+    description="AI-powered medical report analysis backend",
+    version="1.0.0",
+)
 
+# --- CORS Configuration ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, restrict to your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# --- Global Error Handler ---
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "detail": str(exc)},
+    )
+
+
+# --- Health Check ---
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "message": "Dolo backend is running"}
+    return {"status": "ok", "service": "Dolo AI Backend", "version": "1.0.0"}
 
-# Register routers
 
+# --- Register Routers ---
 app.include_router(conversation.router)
 app.include_router(analyze.router)
-
-@app.get("/debug-key")
-def debug_key():
-    return {"key_starts_with": GEMINI_API_KEY[:10] if GEMINI_API_KEY else "NONE"}
