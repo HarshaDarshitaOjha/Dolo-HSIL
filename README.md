@@ -5,13 +5,21 @@ AI middleware backend that analyzes medical report images + lab values using Goo
 Built with FastAPI + PostgreSQL + SQLAlchemy and designed for clean AI memory handling and production deployment.
 
 ✨ Features
+
 🧠 Multi-turn AI conversation memory
+
 🖼️ Medical report image analysis (Vision model)
+
 📊 Structured JSON clinical outputs
+
 ⚠️ Severity classification (low / medium / high)
+
 🧪 Recommended follow-up tests
+
 💡 Lifestyle suggestions
+
 🗂️ Conversation + report history storage
+
 🔒 Clean architecture with service layer separation
 
 🛠️ Tech Stack
