@@ -15,21 +15,38 @@ An AI middleware backend that accepts medical report images, analyzes them using
 
 ## 🏗️ Architecture
 User uploads image
+
 ↓
+
 Backend receives file (FastAPI)
+
 ↓
+
 Validates type + size → Saves to disk + DB
+
 ↓
+
 Converts to base64 → Builds context:
+
 → System prompt (guardrails + JSON format)
+
 → Memory prompt (conversation continuity)
+
 → Last 10 messages from DB
+
 → New user message + image
+
 ↓
+
 Sends to Google Gemini 2.5 Flash (temp=0.2)
+
 ↓
+
 Stores AI response in PostgreSQL
 
+↓
+
+Returns structured JSON to client
 
 ## 📁 Project Structure
 backend/
