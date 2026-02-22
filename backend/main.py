@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles       # ← NEW
 from database import engine, Base
 from routers import conversation, analyze
 
@@ -13,14 +14,17 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# --- CORS Configuration ---
+# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to your frontend domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- Serve uploaded images as static files ---       # ← NEW
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 # --- Global Error Handler ---
@@ -32,12 +36,10 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# --- Health Check ---
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "Dolo AI Backend", "version": "1.0.0"}
 
 
-# --- Register Routers ---
 app.include_router(conversation.router)
 app.include_router(analyze.router)

@@ -10,3 +10,4 @@ class Conversation(Base):
     title = Column(String, default = "New Conversation")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     messages = relationship("Message", back_populates="conversation")
+    reports = relationship("Report", back_populates="conversation")  # ← NEW
