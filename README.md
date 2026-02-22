@@ -5,21 +5,13 @@ AI middleware backend that analyzes medical report images + lab values using Goo
 Built with FastAPI + PostgreSQL + SQLAlchemy and designed for clean AI memory handling and production deployment.
 
 ✨ Features
-
 🧠 Multi-turn AI conversation memory
-
 🖼️ Medical report image analysis (Vision model)
-
 📊 Structured JSON clinical outputs
-
 ⚠️ Severity classification (low / medium / high)
-
 🧪 Recommended follow-up tests
-
 💡 Lifestyle suggestions
-
 🗂️ Conversation + report history storage
-
 🔒 Clean architecture with service layer separation
 
 🛠️ Tech Stack
@@ -30,57 +22,85 @@ ORM	SQLAlchemy
 AI Model	Google Gemini 2.5 Flash
 Image Handling	Base64 encoding
 Environment Config	python-dotenv
+
 🏗️ System Architecture
 User uploads image
-        ↓
-FastAPI receives file
-        ↓
-Validate type + size
-        ↓
-Save to disk + PostgreSQL
-        ↓
-Convert image → base64
-        ↓
-Build AI Context:
-    • System prompt (guardrails + JSON format)
-    • Memory prompt
-    • Last 10 DB messages
-    • New user message + image
-        ↓
-Send to Gemini 2.5 Flash (temperature=0.2)
-        ↓
-Store AI response in PostgreSQL
-        ↓
-Return structured JSON to client
+
+↓
+
+Backend receives file (FastAPI)
+
+↓
+
+Validates type + size → Saves to disk + DB
+
+↓
+
+Converts to base64 → Builds context:
+
+→ System prompt (guardrails + JSON format)
+
+→ Memory prompt (conversation continuity)
+
+→ Last 10 messages from DB
+
+→ New user message + image
+
+↓
+
+Sends to Google Gemini 2.5 Flash (temp=0.2)
+
+↓
+
+Stores AI response in PostgreSQL
+
+↓
+
+Returns structured JSON to client
+
 📁 Project Structure
 backend/
-│
-├── main.py                 # FastAPI app + CORS + global error handling
-├── config.py               # Environment variable loader
-├── database.py             # SQLAlchemy engine + DB session
-│
+
+├── [main.py](http://main.py)                 # FastAPI app + CORS + error handling
+
+├── [config.py](http://config.py)               # Environment variable loader
+
+├── [database.py](http://database.py)             # SQLAlchemy engine + session
+
 ├── models/
-│   ├── conversation.py     # Conversation model
-│   ├── message.py          # Message model
-│   └── report.py           # Report (stored images) model
-│
+
+│   ├── [conversation.py](http://conversation.py)     # Conversation model
+
+│   ├── [message.py](http://message.py)          # Message model
+
+│   └── [report.py](http://report.py)           # Report (stored images) model
+
 ├── schemas/
-│   └── schemas.py          # Pydantic request/response schemas
-│
+
+│   └── [schemas.py](http://schemas.py)          # Pydantic request/response schemas
+
 ├── routers/
-│   ├── conversation.py     # Conversation CRUD endpoints
-│   └── analyze.py          # Chat + image analysis endpoints
-│
+
+│   ├── [conversation.py](http://conversation.py)     # Conversation CRUD endpoints
+
+│   └── [analyze.py](http://analyze.py)          # Text chat + image analysis endpoints
+
 ├── services/
-│   ├── ai_service.py       # Gemini API integration
-│   └── memory_service.py   # Context builder + message persistence
-│
+
+│   ├── ai_[service.py](http://service.py)       # Gemini API integration (text + vision)
+
+│   └── memory_[service.py](http://service.py)   # Context builder + message storage
+
 ├── utils/
-│   └── prompts.py          # System + memory prompt templates
-│
-├── uploads/                # Stored medical report images
+
+│   └── [prompts.py](http://prompts.py)          # System + memory prompt templates
+
+├── uploads/                # Stored report images
+
 ├── requirements.txt
-└── .env                    # Environment variables (not committed)
+
+└── .env                    # API keys (not committed)
+
 📡 API Endpoints
 🩺 Health Check
 GET /health
