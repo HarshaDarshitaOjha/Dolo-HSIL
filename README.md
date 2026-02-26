@@ -1,278 +1,174 @@
-🏥 Dolo — AI-Powered Medical Report Analyzer
+```
+# 🩺 Dolo - Medical Report AI Analyzer
 
-AI middleware backend that analyzes medical report images + lab values using Google Gemini 2.5 Flash (Vision + Text) and returns structured, clinically readable JSON responses with severity levels and recommendations.
+Dolo is an AI-powered medical report analysis backend that helps users understand complex medical documents. By leveraging Gemini 2.5 Flash, Dolo extracts key health insights from uploaded reports and maintains a contextual conversation with the user to answer follow-up questions.
 
-Built with FastAPI + PostgreSQL + SQLAlchemy and designed for clean AI memory handling and production deployment.
+![Dolo AI](https://img.shields.io/badge/Dolo-v1.0.0-blue)
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)
+![Gemini 2.5](https://img.shields.io/badge/Gemini-2.5_Flash-orange)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-red)
 
-✨ Features
+---
 
-🧠 Multi-turn AI conversation memory
+## ✨ Features
 
-🖼️ Medical report image analysis (Vision model)
+- **🔍 Intelligent Report Analysis**: Automatically extracts and summarizes data from medical report images (PNG, JPEG, WEBP).
+- **💬 Context-Aware Chat**: Remembers previous messages and report contexts within a conversation for specialized follow-up.
+- **🖼️ Persistent Storage**: Securely stores uploaded reports and conversation history for longitudinal health tracking.
+- **📄 Structured Insights**: Attempts to provide AI responses in structured JSON format for potential frontend integration.
+- **🚀 High Performance**: Built with FastAPI for rapid response times and efficient asynchronous handling.
 
-📊 Structured JSON clinical outputs
+---
 
-⚠️ Severity classification (low / medium / high)
+## 🎯 How It Works
 
-🧪 Recommended follow-up tests
+### 📊 The Analysis Pipeline
 
-💡 Lifestyle suggestions
+Dolo uses a multi-stage process to transform a medical image into a meaningful conversation.
 
-🗂️ Conversation + report history storage
+```mermaid
+graph TD
+    A[Medical Report Image] --> B[Upload & Storage]
+    B --> C[Context Extraction]
+    C --> D{Gemini Vision Engine}
+    D --> E[Structured Analysis]
+    E --> F[Conversation Memory]
+    F --> G[Health Assistant Response]
+    
+    subgraph "The Analysis Engine"
+    D1["Vision: OCR & Image Interpretation"]
+    D2["NLP: Contextual Reasoning"]
+    end
+```
 
-🔒 Clean architecture with service layer separation
+### 🏗️ Architecture
 
-🛠️ Tech Stack
-Layer	Tool
-Backend Framework	FastAPI
-Database	PostgreSQL (Neon)
-ORM	SQLAlchemy
-AI Model	Google Gemini 2.5 Flash
-Image Handling	Base64 encoding
-Environment Config	python-dotenv
+```mermaid
+graph LR
+    User((User)) <--> API[FastAPI Backend]
+    API <--> AI[Gemini 2.5 Flash]
+    API <--> DB[(PostgreSQL Database)]
+    API <--> Storage[File System /uploads]
+    
+    subgraph "Backend Modules"
+    API --- R[Analyze & Chat Routers]
+    API --- S[AI & Memory Services]
+    API --- M[SQLAlchemy Models]
+    end
+```
 
-🏗️ System Architecture
-User uploads image
+---
 
-↓
+## 🚀 Quick Start
 
-Backend receives file (FastAPI)
+### Prerequisites
 
-↓
+- Python 3.10+
+- A Gemini API Key from [Google AI Studio](https://aistudio.google.com/)
 
-Validates type + size → Saves to disk + DB
+### Setup
 
-↓
+1. **Clone the repository and navigate to the backend:**
 
-Converts to base64 → Builds context:
+   ```bash
+   cd backend
+   ```
 
-→ System prompt (guardrails + JSON format)
+2. **Create and activate a virtual environment:**
 
-→ Memory prompt (conversation continuity)
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-→ Last 10 messages from DB
+3. **Install dependencies:**
 
-→ New user message + image
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-↓
+4. **Configure environment variables:**
 
-Sends to Google Gemini 2.5 Flash (temp=0.2)
+   Create a `.env` file in the `backend/` directory:
 
-↓
+   ```env
+   DATABASE_URL=postgresql://user:password@localhost/dolo_db
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
 
-Stores AI response in PostgreSQL
+5. **Run the server:**
 
-↓
+   ```bash
+   uvicorn main:app --reload
+   ```
 
-Returns structured JSON to client
+   The API will be available at `http://localhost:8000`.
 
-📁 Project Structure
-backend/
+---
 
-├── [main.py](http://main.py)                 # FastAPI app + CORS + error handling
+## 📁 Project Structure
 
-├── [config.py](http://config.py)               # Environment variable loader
+```text
+Dolo-HSIL/
+├── backend/
+│   ├── main.py             # FastAPI entry point & app config
+│   ├── database.py         # SQLAlchemy engine & session management
+│   ├── config.py           # Environment variable loader
+│   ├── models/             # Database models (Conversation, Report, etc.)
+│   ├── routers/            # API endpoints (analyze.py, conversation.py)
+│   ├── services/           # Business logic (ai_service, memory_service)
+│   ├── schemas/            # Pydantic validation schemas
+│   └── uploads/            # Local storage for report images
+├── README.md               # Current documentation
+└── README_INSPIRATION.md   # Structural template
+```
 
-├── [database.py](http://database.py)             # SQLAlchemy engine + session
+---
 
-├── models/
+## 🔌 API Endpoints
 
-│   ├── [conversation.py](http://conversation.py)     # Conversation model
+### AI Analysis & Chat
 
-│   ├── [message.py](http://message.py)          # Message model
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/analyze-report/{id}` | Upload an image for structured AI analysis |
+| POST | `/chat/{id}` | Send a text message to continue the conversation |
 
-│   └── [report.py](http://report.py)           # Report (stored images) model
+### Conversations
 
-├── schemas/
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/conversation/` | Create a new conversation session |
+| GET | `/conversation/{id}` | Retrieve history of a specific conversation |
+| GET | `/conversation/{id}/reports` | List all reports associated with a session |
 
-│   └── [schemas.py](http://schemas.py)          # Pydantic request/response schemas
+### System
 
-├── routers/
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| GET | `/health` | Check service health status |
 
-│   ├── [conversation.py](http://conversation.py)     # Conversation CRUD endpoints
+---
 
-│   └── [analyze.py](http://analyze.py)          # Text chat + image analysis endpoints
+## 💻 Tech Stack
 
-├── services/
+- **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
+- **AI Engine**: [Google Generative AI (Gemini 2.5 Flash)](https://ai.google.dev/)
+- **ORM**: [SQLAlchemy](https://www.sqlalchemy.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/)
+- **Validation**: [Pydantic](https://docs.pydantic.dev/)
 
-│   ├── ai_[service.py](http://service.py)       # Gemini API integration (text + vision)
+---
 
-│   └── memory_[service.py](http://service.py)   # Context builder + message storage
+## 📝 License
 
-├── utils/
-
-│   └── [prompts.py](http://prompts.py)          # System + memory prompt templates
-
-├── uploads/                # Stored report images
-
-├── requirements.txt
-
-└── .env                    # API keys (not committed)
-
-📡 API Endpoints
-🩺 Health Check
-GET /health
-{
-  "status": "ok",
-  "service": "Dolo AI Backend",
-  "version": "1.0.0"
-}
-💬 Create Conversation
-POST /conversation/
-{
-  "title": "Blood Test Analysis"
-}
-
-Response:
-
-{
-  "id": 1,
-  "title": "Blood Test Analysis",
-  "created_at": "...",
-  "messages": []
-}
-📖 Get Conversation
-GET /conversation/{conversation_id}
-
-Returns full conversation history including stored AI responses.
-
-🧠 Text Chat (With Memory)
-POST /chat/{conversation_id}
-{
-  "message": "My hemoglobin is 10.2 g/dL and WBC is 12,500. Is this normal?"
-}
-
-Response:
-
-{
-  "conversation_id": 1,
-  "response": {
-    "summary": "Mildly low hemoglobin with elevated WBC count",
-    "abnormal_findings": [
-      {
-        "parameter": "Hemoglobin",
-        "value": "10.2 g/dL",
-        "normal_range": "12-16 g/dL",
-        "severity": "medium"
-      },
-      {
-        "parameter": "WBC",
-        "value": "12,500",
-        "normal_range": "4,500-11,000",
-        "severity": "low"
-      }
-    ],
-    "recommended_tests": [
-      "Iron studies",
-      "Peripheral blood smear"
-    ],
-    "lifestyle_suggestions": [
-      "Increase iron-rich foods",
-      "Follow up in 2 weeks"
-    ],
-    "urgency": "medium"
-  }
-}
-🖼️ Image Analysis
-POST /analyze-report/{conversation_id}
+This project is licensed under the MIT License.
 
-Content-Type: multipart/form-data
+---
 
-file: medical report image
+## 🏥 Medical Disclaimer
 
-message: optional text prompt
+**IMPORTANT**: Dolo is a tool for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Never disregard professional medical advice or delay in seeking it because of something you have read through this application.
 
-Example:
-
-file: blood_test.jpg
-message: "Analyze this blood test report"
-
-Response:
-
-{
-  "conversation_id": 1,
-  "report_id": 1,
-  "filename": "blood_test.jpg",
-  "file_url": "/uploads/1708123456_blood_test.jpg",
-  "response": {
-    "summary": "...",
-    "abnormal_findings": [...],
-    "recommended_tests": [...],
-    "lifestyle_suggestions": [...],
-    "urgency": "medium"
-  }
-}
-🗂️ Get Reports for a Conversation
-GET /conversation/{conversation_id}/reports
-
-Returns all uploaded medical reports linked to that conversation.
-
-🚀 Run Locally
-Prerequisites
-
-Python 3.10+
-
-PostgreSQL database (e.g., Neon)
-
-Google Gemini API key
-
-1️⃣ Clone Repository
-git clone https://github.com/your-username/dolo-backend.git
-cd dolo-backend/backend
-2️⃣ Create Virtual Environment
-python -m venv venv
-source venv/bin/activate      # Mac/Linux
-venv\Scripts\activate         # Windows
-3️⃣ Install Dependencies
-pip install -r requirements.txt
-4️⃣ Configure Environment Variables
-
-Create a .env file:
-
-DATABASE_URL=postgresql://username:password@host/dbname
-GEMINI_API_KEY=your_google_gemini_api_key
-5️⃣ Run Server
-uvicorn main:app --reload
-
-Server runs at:
-
-http://localhost:8000
-
-Swagger docs available at:
-
-http://localhost:8000/docs
-🔐 AI Design Principles
-
-Deterministic output (temperature = 0.2)
-
-Strict JSON schema enforcement
-
-Medical safety guardrails in system prompt
-
-Limited memory window (last 10 messages)
-
-Clean separation between AI service and memory service
-
-📌 Future Improvements
-
-Role-based authentication
-
-PDF report support
-
-Structured lab reference ranges by region
-
-Redis caching for context building
-
-Deployment on Render / Railway
-
-Frontend dashboard (React)
-
-⚠️ Disclaimer
-
-Dolo is an AI-assisted medical interpretation tool.
-It does not replace professional medical diagnosis.
-Users must consult licensed healthcare providers for medical decisions.
-
-🧑‍💻 Author
-
-Built with precision and structured architecture for production-ready AI middleware.
+```
