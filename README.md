@@ -1,4 +1,3 @@
-```
 # 🩺 Dolo - Medical Report AI Analyzer
 
 Dolo is an AI-powered medical report analysis backend that helps users understand complex medical documents. By leveraging Gemini 2.5 Flash, Dolo extracts key health insights from uploaded reports and maintains a contextual conversation with the user to answer follow-up questions.
@@ -170,5 +169,3 @@ This project is licensed under the MIT License.
 ## 🏥 Medical Disclaimer
 
 **IMPORTANT**: Dolo is a tool for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Never disregard professional medical advice or delay in seeking it because of something you have read through this application.
-
-```
